@@ -6,40 +6,36 @@ output:
 editor: visual
 ---
 
-## Exercice 1
+# Exercice 1
 
-```{r, echo=FALSE, warning=FALSE, results='hide', message = FALSE}
+
 library(here)
 here::i_am('TP3 Dplyr Tidyr.Rproj')
 spotify <- here("top-spotify-hits-2000-2019 .Rds") 
 spotify<-readRDS(spotify)
-```
 
-### 1
 
-```{r, echo=FALSE, warning=FALSE, results='hide', message = FALSE}
+# 1
+
+
 library(dplyr)
 nsongs<-nrow(spotify %>% distinct(song))
 nartists<-nrow(spotify %>% distinct(artist))
 ngenre<-nrow(spotify %>% distinct(genre))
 
+#There are `r nsongs` tracks, `r nartists` artists, and `r ngenre` genres.
 
-```
+# 2
 
-There are `r nsongs` tracks, `r nartists` artists, and `r ngenre` genres.
 
-### 2
-
-```{r, echo=FALSE, warning=FALSE, message = FALSE}
 library(knitr)
 nsongs_year<-spotify %>% distinct(song, year)
 knitr::kable(table(nsongs_year[2]))
 
-```
 
-### 3
 
-```{r, echo=FALSE, warning=FALSE, message = FALSE}
+# 3
+
 nsongs_artist<-spotify %>% distinct(song, artist)
 
 
@@ -50,35 +46,33 @@ bestsinger<-nsongs_artist|>count(artist)|>slice_max(n)|>pull(artist)
 nbest<-nsongs_artist|>count(artist)|>slice_max(n)|>pull(n)
 
 
-```
 
-The best singer is `r bestsinger` with `r nbest` songs.
+#The best singer is `r bestsinger` with `r nbest` songs.
 
-### 4
+# 4
 
-```{r, echo=FALSE, warning=FALSE, message = FALSE}
+
 df_bpm<-spotify%>% distinct(genre, song, tempo)|>
   group_by(genre) %>% 
   summarize(min(tempo),max(tempo),mean(tempo),median(tempo),effectif = n())
 
 knitr::kable(df_bpm)
 
-```
 
-### 5
 
-```{r, echo=FALSE, warning=FALSE, message = FALSE}
+#5
+
+
 df_nrgy_dnce<-spotify %>% distinct(energy, danceability,year)|>
   group_by(year)  %>%
   summarise(nrgy=median(energy),dnce=median(danceability))
 
 knitr::kable(df_nrgy_dnce)
   
-```
 
-### 6
 
-```{r, echo=FALSE, warning=FALSE, message = FALSE}
+# 6
+
 library(ggplot2)
 
 year<-df_nrgy_dnce[[1]]
@@ -96,39 +90,39 @@ median annual danceability",
        color = 'legend') 
 
 
-```
 
-## Exercice 2
 
-```{r, echo=FALSE, warning=FALSE, message = FALSE}
+# Exercice 2
+
+
 dropout <- here("dropout.Rds") 
 dropout<-readRDS(dropout)
-```
 
-### 1
 
-```{r, echo=FALSE, warning=FALSE, message = FALSE}
+# 1
+
+
 
 df_marital_gender<-dropout %>%
   group_by(`Marital status`,`Gender`)|>
   summarize(med_age=median(`Age at enrollment`))
 
 knitr::kable(df_marital_gender)
-```
 
-### 2
 
-```{r, echo=FALSE, warning=FALSE, message = FALSE}
+# 2
+
+
 library(tidyverse)
 df_marital_gender2<-df_marital_gender %>%
   pivot_wider(names_from = Gender, values_from = med_age) 
 
 knitr::kable(df_marital_gender2)
-```
 
-### 3
 
-```{r, echo=FALSE, warning=FALSE, message = FALSE}
+# 3
+
+
 
 df_curricular<- dropout %>% select(Target,`Curricular units 1st sem (credited)`,`Curricular units 1st sem (enrolled)`,`Curricular units 1st sem (evaluations)`,`Curricular units 1st sem (grade)`,`Curricular units 1st sem (without evaluations)`,`Curricular units 2nd sem (credited)`, `Curricular units 2nd sem (enrolled)`,`Curricular units 2nd sem (evaluations)`,`Curricular units 2nd sem (grade)`,`Curricular units 2nd sem (without evaluations)`)
 
@@ -136,11 +130,11 @@ curricular_mean<-df_curricular |>group_by(Target)%>%
   summarise(across(where(is.numeric),mean))
 
 knitr::kable(curricular_mean)
-```
 
-### 4
 
-```{r, echo=FALSE, warning=FALSE, message = FALSE}
+# 4
+
+
 options(digits=2)
 mean_curricular2<-t(curricular_mean %>%
   pivot_wider(names_from = Target, values_from = Target))
@@ -149,6 +143,6 @@ mean_curricular2<-mean_curricular2[c(-11,-12,-13),] #on supprime les lignes inut
 
 colnames(mean_curricular2)<-c("Dropout",'Graduate',"Enrolled")
 knitr::kable(mean_curricular2)
-```
+
 
 
