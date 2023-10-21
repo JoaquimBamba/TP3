@@ -1,6 +1,154 @@
 ---
-title: "TP3 github version"
-format: html
+title: "TP3 VF"
+output:
+  html_document:
+    code_folding: hide
 editor: visual
 ---
+
+## Exercice 1
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message = FALSE}
+library(here)
+here::i_am('TP3 Dplyr Tidyr.Rproj')
+spotify <- here("top-spotify-hits-2000-2019 .Rds") 
+spotify<-readRDS(spotify)
+```
+
+### 1
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message = FALSE}
+library(dplyr)
+nsongs<-nrow(spotify %>% distinct(song))
+nartists<-nrow(spotify %>% distinct(artist))
+ngenre<-nrow(spotify %>% distinct(genre))
+
+
+```
+
+There are `r nsongs` tracks, `r nartists` artists, and `r ngenre` genres.
+
+### 2
+
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+library(knitr)
+nsongs_year<-spotify %>% distinct(song, year)
+knitr::kable(table(nsongs_year[2]))
+
+```
+
+### 3
+
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+nsongs_artist<-spotify %>% distinct(song, artist)
+
+
+table_art<-table(nsongs_artist[1])
+
+bestsinger<-nsongs_artist|>count(artist)|>slice_max(n)|>pull(artist)
+
+nbest<-nsongs_artist|>count(artist)|>slice_max(n)|>pull(n)
+
+
+```
+
+The best singer is `r bestsinger` with `r nbest` songs.
+
+### 4
+
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+df_bpm<-spotify%>% distinct(genre, song, tempo)|>
+  group_by(genre) %>% 
+  summarize(min(tempo),max(tempo),mean(tempo),median(tempo),effectif = n())
+
+knitr::kable(df_bpm)
+
+```
+
+### 5
+
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+df_nrgy_dnce<-spotify %>% distinct(energy, danceability,year)|>
+  group_by(year)  %>%
+  summarise(nrgy=median(energy),dnce=median(danceability))
+
+knitr::kable(df_nrgy_dnce)
+  
+```
+
+### 6
+
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+library(ggplot2)
+
+year<-df_nrgy_dnce[[1]]
+med_nrgy<-df_nrgy_dnce[[2]]
+med_dnce<-df_nrgy_dnce[[3]]
+
+ggplot(data=df_nrgy_dnce)+
+  geom_line(aes(x = year, y = med_nrgy, color = "med_nrgy")) +
+  geom_line(aes(x = year, y = med_dnce, color = "med_dnce"))+
+  ylab("med_energy med_danceability")+
+  labs(title = "temporal evolution of the median annual energy and the
+median annual danceability",
+       x = "year",
+       y = "med_danceability med_energy",
+       color = 'legend') 
+
+
+```
+
+## Exercice 2
+
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+dropout <- here("dropout.Rds") 
+dropout<-readRDS(dropout)
+```
+
+### 1
+
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+
+df_marital_gender<-dropout %>%
+  group_by(`Marital status`,`Gender`)|>
+  summarize(med_age=median(`Age at enrollment`))
+
+knitr::kable(df_marital_gender)
+```
+
+### 2
+
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+library(tidyverse)
+df_marital_gender2<-df_marital_gender %>%
+  pivot_wider(names_from = Gender, values_from = med_age) 
+
+knitr::kable(df_marital_gender2)
+```
+
+### 3
+
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+
+df_curricular<- dropout %>% select(Target,`Curricular units 1st sem (credited)`,`Curricular units 1st sem (enrolled)`,`Curricular units 1st sem (evaluations)`,`Curricular units 1st sem (grade)`,`Curricular units 1st sem (without evaluations)`,`Curricular units 2nd sem (credited)`, `Curricular units 2nd sem (enrolled)`,`Curricular units 2nd sem (evaluations)`,`Curricular units 2nd sem (grade)`,`Curricular units 2nd sem (without evaluations)`)
+
+curricular_mean<-df_curricular |>group_by(Target)%>%
+  summarise(across(where(is.numeric),mean))
+
+knitr::kable(curricular_mean)
+```
+
+### 4
+
+```{r, echo=FALSE, warning=FALSE, message = FALSE}
+options(digits=2)
+mean_curricular2<-t(curricular_mean %>%
+  pivot_wider(names_from = Target, values_from = Target))
+
+mean_curricular2<-mean_curricular2[c(-11,-12,-13),] #on supprime les lignes inutiles
+
+colnames(mean_curricular2)<-c("Dropout",'Graduate',"Enrolled")
+knitr::kable(mean_curricular2)
+```
+
 
